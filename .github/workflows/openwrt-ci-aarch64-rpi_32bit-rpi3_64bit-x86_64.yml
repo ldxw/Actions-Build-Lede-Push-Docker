@@ -18,7 +18,7 @@ on:
 env:
   DOCKER_REGISTRY_USERNAME: xxsxx@aliyun.com	#email
   DOCKER_REGISTRY_HOST: registry.cn-hangzhou.aliyuncs.com
-  DOCKER_REGISTRY_URL: registry.cn-hangzhou.aliyuncs.com/ldxw/
+  DOCKER_REGISTRY_URL: registry.cn-hangzhou.aliyuncs.com/docker_latest/
 
 jobs:
 
