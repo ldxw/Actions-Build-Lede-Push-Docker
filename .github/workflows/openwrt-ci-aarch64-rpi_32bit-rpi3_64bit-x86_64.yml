@@ -16,9 +16,9 @@ on:
       - "*.docx"
 
 env:
-  DOCKER_REGISTRY_USERNAME: muyeyifeng@163.com	#email
-  DOCKER_REGISTRY_HOST: registry.cn-beijing.aliyuncs.com
-  DOCKER_REGISTRY_URL: registry.cn-beijing.aliyuncs.com/muyeyifeng/
+  DOCKER_REGISTRY_USERNAME: xxsxx@aliyun.com	#email
+  DOCKER_REGISTRY_HOST: registry.cn-hangzhou.aliyuncs.com
+  DOCKER_REGISTRY_URL: registry.cn-hangzhou.aliyuncs.com/ldxw/
 
 jobs:
 
