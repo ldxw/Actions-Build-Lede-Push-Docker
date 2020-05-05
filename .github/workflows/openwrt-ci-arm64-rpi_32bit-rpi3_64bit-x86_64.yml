@@ -28,7 +28,8 @@ jobs:
 
     strategy:
       matrix:
-        db-backend: [rpi2-3-4, rpi364, arm64,x64]
+        #db-backend: [rpi2-3-4, rpi364, arm64,x64]
+        db-backend: [arm64]
 
     steps:
       - name: Checkout
