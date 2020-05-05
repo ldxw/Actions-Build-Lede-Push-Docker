@@ -1,9 +1,6 @@
 #
 # This is free software, lisence use MIT.
 # 
-# 
-# <https://github.com/KFERMercer/OpenWrt-CI>
-# 
 
 ####需要设置secrets.ALIDOCKER_KEY####
 ####阿里云镜像仓库-->访问权限-->固定密码####
@@ -15,10 +12,8 @@ on:
     branches: 
       - master
     paths-ignore:
-      - .github/workflows/openwrt-ci-n1.yml
-      - .github/workflows/openwrt-ci-rpi2-3-4.yml
-      - .github/workflows/openwrt-ci-rpi364.yml
-      - .github/workflows/openwrt-ci-x64.yml
+      - "*.md"
+      - "*.docx"
 
 env:
   DOCKER_REGISTRY_USERNAME: muyeyifeng@163.com	#email
@@ -33,7 +28,7 @@ jobs:
 
     strategy:
       matrix:
-        db-backend: [rpi2-3-4, rpi364, n1,x64]
+        db-backend: [rpi2-3-4, rpi364, aarch64,x64]
 
     steps:
       - name: Checkout
@@ -41,6 +36,9 @@ jobs:
         with:
           ref: master
           fetch-depth: 1000000
+
+      - name: Clone source code
+        run: git clone  https://github.com/coolsnowwolf/lede
 
       - name: Space cleanup
         env:
@@ -51,23 +49,12 @@ jobs:
           sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d
           sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php*
           sudo -E apt-get update
-          sudo -E apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs gcc-multilib g++-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler
+          #=========================
+          $(cat lede/README.md |grep "sudo apt-get" | sed -n 2p)
+          #sudo -E apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3.5 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf
           sudo -E apt-get -y autoremove --purge
           sudo -E apt-get clean
-
-          # 利用挂载在 /mnt/ 的 14G 额外空间:
-          # sudo mkdir -p -m 777 /mnt/openwrt/bin /mnt/openwrt/build_dir/host /mnt/openwrt/build_dir/hostpkg /mnt/openwrt/dl /mnt/openwrt/feeds /mnt/openwrt/staging_dir
-          # ln -s /mnt/openwrt/bin ./bin
-          # mkdir -p ./build_dir/host && ln -s /mnt/openwrt/build_dir/host ./build_dir/host
-          # mkdir -p ./build_dir/host && ln -s /mnt/openwrt/build_dir/hostpkg ./build_dir/hostpkg
-          # ln -s /mnt/openwrt/dl ./dl
-          # ln -s /mnt/openwrt/feeds ./feeds
-          # ln -s /mnt/openwrt/staging_dir ./staging_dir
-
           df -h
-
-      - name: Clone source code
-        run: git clone  https://github.com/coolsnowwolf/lede
 
       - name: Update feeds
         run: |
@@ -79,6 +66,11 @@ jobs:
           cd lede
           ./scripts/feeds update -a
           ./scripts/feeds install -a
+
+      - name: Add important app
+        run: |
+          git clone https://github.com/fw876/helloworld
+          mv helloworld/luci-app-ssr-plus lede/package/lean
 
       - name: Generate configuration file
         run: |
@@ -112,11 +104,11 @@ jobs:
 
       - name: Build DockerImage
         run: |
-          mkdir docker-build && cd docker-build
+          mkdir docker-build
           echo "======================="
           path=$(find -type f -name "*rootfs.tar.gz")
-          echo "======================="
           echo $path
+          echo "======================="
           mv $path docker-build/
           cp  ${{ matrix.db-backend }}-Dockerfile docker-build/Dockerfile
           cd docker-build
@@ -124,7 +116,6 @@ jobs:
 
       - name: Push DockerImage
         run: |
-         mkdir docker-build && cd docker-build
          sudo docker login --username=$DOCKER_REGISTRY_USERNAME --password=${{ secrets.ALIDOCKER_KEY }}  $DOCKER_REGISTRY_HOST
          echo "============================="
          sudo docker images
